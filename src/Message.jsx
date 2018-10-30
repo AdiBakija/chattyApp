@@ -5,13 +5,14 @@ class Message extends Component {
     return (
       <div>
         <div className="message">
-          <span className="message-username">Adi Bakija</span>
-          <span className="message-content">My brain can't handle all this knowledge!</span>
+          <span className="message-username">{this.props.messages.username}</span>
+          <span className="message-content">{this.props.messages.content}</span>
         </div>
-      {/* The system message below might need to be moved elsewhere and not rendered like this. */}
+      {/* The system message below might need to be moved elsewhere and not rendered like this.
         <div className="message system">
           Anonymous1 changed their name to Adi Bakija.
         </div>
+      */}
       </div>
     );
   }
