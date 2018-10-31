@@ -7,19 +7,8 @@ class App extends Component {
     super(props);
     // this is the *only* time you should assign directly to state:
     this.state = {
-      currentUser: {name: "Bob"},
-      messages: [
-        {
-          id: 1,
-          username: "Bob",
-          content: "Has anyone seen my marbles?",
-        },
-        {
-          id: 2,
-          username: "Anonymous",
-          content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-        }
-      ]
+      currentUser: {name: "John Smith"},//The current user will be stored here
+      messages: [] // messages coming from the server will be stored here as they arrive
     };
   }
 
@@ -27,38 +16,37 @@ class App extends Component {
   // DOM. This is a good place to make AJAX requests or setTimeout.
   componentDidMount() {
     console.log("componentDidMount <App />");
-    setTimeout(() => {
-      console.log("Simulating incoming message");
-      // Add a new message to the list of messages in the data store
-      const newMessage = {id: 3, username: "Michelle", content: "Hello there!"};
-      const messages = this.state.messages.concat(newMessage)
-      // Update the state of the app component.
-      // Calling setState will trigger a call to render() in App and all child components.
-      this.setState({messages: messages})
-    }, 3000);
+    this.socket = new WebSocket("ws://localhost:3001");
+    //This tests to see connection to server has succeeded
+    this.socket.onopen = (evt) => {
+      console.log("Connected to server");
+    }
+    //Intercept all messages returned from the server and broadcast to all clients by updating the state.
+    //This is called within this lifecycle method to ensure all users have the latest messages.
+    this.socket.onmessage = (event) => {
+      let incomingMessage = JSON.parse(event.data);
+      const messages = this.state.messages.concat(incomingMessage)
+      this.setState({messages});
+    }
   }
 
-  generateRandomId = (alphabet => {
-    const alphabetLength = alphabet.length;
-    const randoIter = (key, n) => {
-      if (n === 0) {
-        return key;
-      }
-      const randoIndex = Math.floor(Math.random() * alphabetLength);
-      const randoLetter = alphabet[randoIndex];
-      return randoIter(key + randoLetter, n - 1);
-    };
-    return () => randoIter("", 10);
-  })("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-
+  //A method for sending messages to the server, it is linked directly with the enter key handler found
+  //inside of the ChatBar component which is where it receives message content.
   addMessages = (message) => {
     const newMessage = {
-      id: this.generateRandomId(),
       username: this.state.currentUser.name,
       content: message
     };
-    const messages = this.state.messages.concat(newMessage)
-    this.setState({messages: messages})
+    //How the message is communicated to the server
+    this.socket.send(JSON.stringify(newMessage));
+  }
+  //A method to update the current users name state based on the input they provide from
+  //the onChange handler found inside of the ChatBar component
+  addNewUserName = (name) => {
+    const currentUser = {
+      name: name
+    }
+    this.setState({currentUser});
   }
 
   render() {
@@ -68,7 +56,7 @@ class App extends Component {
           <a href="/" className="navbar-brand">Chatty</a>
         </nav>
         <MessageList messages={this.state.messages}/>
-        <ChatBar currentUser={this.state.currentUser} addMessages={this.addMessages}/>
+        <ChatBar currentUser={this.state.currentUser} addMessages={this.addMessages} addNewUserName={this.addNewUserName}/>
       </div>
     );
   }
