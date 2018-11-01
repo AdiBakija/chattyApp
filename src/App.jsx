@@ -7,7 +7,10 @@ class App extends Component {
     super(props);
     // this is the *only* time you should assign directly to state:
     this.state = {
-      currentUser: {name: "Anonymous"},//The current user will be stored here
+      currentUser: {
+        name: "Anonymous",
+        color: "black"
+      },//The current user will be stored here
       messages: [], // messages coming from the server will be stored here as they arrive
       userCount: null
     };
@@ -34,17 +37,23 @@ class App extends Component {
         this.setState({messages: notifications});
       } else if (data.type === "incomingUserAmount") {
         this.setState({userCount: data.numUsers})
+      } else if (data.type === "incomingColor") {
+        let currentUser = {...this.state.currentUser}
+        currentUser.color = data.color;
+        this.setState({currentUser: currentUser})
       }
     }
   }
 
   //A method for sending messages to the server, it is linked directly with the enter key handler found
   //inside of the ChatBar component which is where it receives message content.
-  addMessages = (message) => {
+  addMessages = (message, url) => {
     const newMessage = {
       type: "postMessage",
       username: this.state.currentUser.name,
-      content: message
+      content: message,
+      color: this.state.currentUser.color,
+      url: url
     };
     //How the message is communicated to the server
     this.socket.send(JSON.stringify(newMessage));
@@ -53,7 +62,8 @@ class App extends Component {
   //the onChange handler found inside of the ChatBar component
   addNewUserName = (name) => {
     const currentUser = {
-      name: name
+      name: name,
+      color: this.state.currentUser.color
     }
     const nameChange = {
       type: "postNotification",
@@ -65,19 +75,17 @@ class App extends Component {
   }
 
   render() {
+
     let users;
-    if(this.state.userCount === 1) {
-      users = (<p className="navbar-users">{this.state.userCount} user online</p>);
-    } else {
-      users = (<p className="navbar-users">{this.state.userCount} users online</p>);
-    }
+    this.state.userCount === 1? users = (<p className="navbar-users">{this.state.userCount} user online</p>) : users = (<p className="navbar-users">{this.state.userCount} users online</p>)
+
       return (
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
           {users}
         </nav>
-        <MessageList messages={this.state.messages}/>
+        <MessageList messages={this.state.messages} userColor={this.state.currentUser.color}/>
         <ChatBar currentUser={this.state.currentUser} addMessages={this.addMessages} addNewUserName={this.addNewUserName}/>
       </div>
     );

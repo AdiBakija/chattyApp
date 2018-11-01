@@ -31,6 +31,18 @@ wss.on('connection', (client) => {
   }
   updateUserAmount();
 
+  const assignUserColour = () => {
+    const colorArray = ['blue', 'red', 'pink', 'yellow', 'orange',
+        'black', 'cyan', 'grey'];
+    let randomColor = colorArray[Math.floor(Math.random()*colorArray.length - 1)];
+    const colorObj = {
+      type: "incomingColor",
+      color: randomColor
+    }
+    client.send(JSON.stringify(colorObj));
+  }
+  assignUserColour();
+
   //Handles incoming message information from the clients.
   client.on('message', (event) => {
     //Parses the received information from the client side and parses it back into JSON
@@ -41,7 +53,8 @@ wss.on('connection', (client) => {
         type: "incomingMessage",
         id: uuidv4(),
         username: parsedEvent.username,
-        content: parsedEvent.content
+        content: parsedEvent.content,
+        color: parsedEvent.color
       }
       broadCastAll(messageObj);
 

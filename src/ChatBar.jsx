@@ -5,8 +5,11 @@ class ChatBar extends Component {
   //App component
   handleKeyPressMessage = (event) => {
     let enteredMessage = event.target.value;
+    let imageRegex = /(https?:\/\/.*\.(?:png|jpg|gif))/i;
+    let imageCheck = enteredMessage.match(imageRegex);
+    console.log(imageCheck)
     if(event.key == 'Enter'){
-      this.props.addMessages(enteredMessage)
+      this.props.addMessages(enteredMessage, url)
       event.target.value = "";
     }
   };
@@ -20,6 +23,7 @@ class ChatBar extends Component {
   };
 
   render() {
+
     return (
       <footer className="chatbar">
         <input className="chatbar-username" placeholder="Your name (optional)" onKeyPress={this.handleKeyPressUserName}/>

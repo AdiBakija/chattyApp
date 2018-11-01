@@ -6,7 +6,7 @@ class MessageList extends Component {
     //This constant maps each individual message to the message component
     //Note that when using curly braces after fat arrow function notation a return is required
     const messages = this.props.messages.map(message =>
-      <Message key={message.id} messages={message} />
+      <Message key={message.id} messages={message} userColor={this.props.userColor} />
     );
     return (
      <main className="messages">
