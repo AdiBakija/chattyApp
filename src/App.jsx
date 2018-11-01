@@ -7,8 +7,9 @@ class App extends Component {
     super(props);
     // this is the *only* time you should assign directly to state:
     this.state = {
-      currentUser: {name: "John Smith"},//The current user will be stored here
-      messages: [] // messages coming from the server will be stored here as they arrive
+      currentUser: {name: "Anonymous"},//The current user will be stored here
+      messages: [], // messages coming from the server will be stored here as they arrive
+      userCount: null
     };
   }
 
@@ -21,12 +22,19 @@ class App extends Component {
     this.socket.onopen = (evt) => {
       console.log("Connected to server");
     }
-    //Intercept all messages returned from the server and broadcast to all clients by updating the state.
-    //This is called within this lifecycle method to ensure all users have the latest messages.
+    //Intercept all data returned from the server and broadcast to all clients by
+    //updating the state. This is called within this lifecycle method to ensure all users have the latest data.
     this.socket.onmessage = (event) => {
-      let incomingMessage = JSON.parse(event.data);
-      const messages = this.state.messages.concat(incomingMessage)
-      this.setState({messages});
+      let data = JSON.parse(event.data);
+      if (data.type === "incomingMessage") {
+        const messages = this.state.messages.concat(data);
+        this.setState({messages: messages});
+      } else if (data.type === "incomingNotification") {
+        const notifications = this.state.messages.concat(data);
+        this.setState({messages: notifications});
+      } else if (data.type === "incomingUserAmount") {
+        this.setState({userCount: data.numUsers})
+      }
     }
   }
 
@@ -34,6 +42,7 @@ class App extends Component {
   //inside of the ChatBar component which is where it receives message content.
   addMessages = (message) => {
     const newMessage = {
+      type: "postMessage",
       username: this.state.currentUser.name,
       content: message
     };
@@ -46,14 +55,27 @@ class App extends Component {
     const currentUser = {
       name: name
     }
+    const nameChange = {
+      type: "postNotification",
+      content: `${this.state.currentUser.name} changed their name to ${name}`
+    }
+    //How the notification is communicated to the server
+    this.socket.send(JSON.stringify(nameChange));
     this.setState({currentUser});
   }
 
   render() {
+    let users;
+    if(this.state.userCount === 1) {
+      users = (<p className="navbar-users">{this.state.userCount} user online</p>);
+    } else {
+      users = (<p className="navbar-users">{this.state.userCount} users online</p>);
+    }
       return (
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
+          {users}
         </nav>
         <MessageList messages={this.state.messages}/>
         <ChatBar currentUser={this.state.currentUser} addMessages={this.addMessages} addNewUserName={this.addNewUserName}/>

@@ -21,29 +21,50 @@ const wss = new SocketServer({ server });
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 wss.on('connection', (client) => {
+  console.log("Client connected")
+  const updateUserAmount = () => {
+    const numClients = {
+      type: "incomingUserAmount",
+      numUsers: wss.clients.size
+    }
+    broadCastAll(numClients);
+  }
+  updateUserAmount();
 
+  //Handles incoming message information from the clients.
   client.on('message', (event) => {
     //Parses the received information from the client side and parses it back into JSON
     const parsedEvent = JSON.parse(event);
-    //Accessed the message from the parsed event object
-    const messageObj = {
-      id: uuidv4(),
-      username: parsedEvent.username,
-      content: parsedEvent.content
+    //Accessed the message from the parsed event object and broadcast it back to clients
+    if (parsedEvent.type === "postMessage") {
+      const messageObj = {
+        type: "incomingMessage",
+        id: uuidv4(),
+        username: parsedEvent.username,
+        content: parsedEvent.content
+      }
+      broadCastAll(messageObj);
+
+    } else if (parsedEvent.type === "postNotification") {
+      const notificationObj = {
+        type: "incomingNotification",
+        content: parsedEvent.content
+      }
+      broadCastAll(notificationObj);
     }
-
-    broadCastAll(messageObj);
-
-    console.log("Bob says:", messageObj);
   });
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  client.on('close', () => console.log('Client disconnected'));
+  client.on('close', () => {
+    console.log('Client disconnected');
+    //Ensures the user amount is updated when a user leaves.
+    updateUserAmount();
+  });
 });
 
-//This is a helper function to broadcast a message object back to each client
-const broadCastAll = (messageObj) => {
+//This is a helper function to broadcast data objects back to each client.
+const broadCastAll = (data) => {
   wss.clients.forEach( (client) => {
-    client.send(JSON.stringify(messageObj));
+    client.send(JSON.stringify(data));
   });
 }
