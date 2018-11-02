@@ -47,13 +47,14 @@ class App extends Component {
 
   //A method for sending messages to the server, it is linked directly with the enter key handler found
   //inside of the ChatBar component which is where it receives message content.
-  addMessages = (message, url) => {
+  addMessages = (message, urls = []) => {
+    console.log()
     const newMessage = {
       type: "postMessage",
       username: this.state.currentUser.name,
       content: message,
       color: this.state.currentUser.color,
-      url: url
+      url: urls
     };
     //How the message is communicated to the server
     this.socket.send(JSON.stringify(newMessage));
@@ -69,6 +70,7 @@ class App extends Component {
       type: "postNotification",
       content: `${this.state.currentUser.name} changed their name to ${name}`
     }
+    console.log(nameChange)
     //How the notification is communicated to the server
     this.socket.send(JSON.stringify(nameChange));
     this.setState({currentUser});

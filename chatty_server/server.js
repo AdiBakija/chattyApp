@@ -54,7 +54,8 @@ wss.on('connection', (client) => {
         id: uuidv4(),
         username: parsedEvent.username,
         content: parsedEvent.content,
-        color: parsedEvent.color
+        color: parsedEvent.color,
+        url: parsedEvent.url
       }
       broadCastAll(messageObj);
 
