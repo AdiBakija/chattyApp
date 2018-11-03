@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import MessageList from './MessageList.jsx';
 import ChatBar from './ChatBar.jsx';
-
+//This component holds all the states of the application and renders all content to the page
 class App extends Component {
   constructor(props) {
     super(props);
@@ -10,7 +10,7 @@ class App extends Component {
       currentUser: {
         name: "Anonymous",
         color: "black"
-      },//The current user will be stored here
+      },//The current user will be stored here along with his random color
       messages: [], // messages coming from the server will be stored here as they arrive
       userCount: null
     };
@@ -20,6 +20,7 @@ class App extends Component {
   // DOM. This is a good place to make AJAX requests or setTimeout.
   componentDidMount() {
     console.log("componentDidMount <App />");
+    //Best practice to create a socket connectiong during componentDidMount lifecycle method
     this.socket = new WebSocket("ws://localhost:3001");
     //This tests to see connection to server has succeeded
     this.socket.onopen = (evt) => {
@@ -45,10 +46,9 @@ class App extends Component {
     }
   }
 
-  //A method for sending messages to the server, it is linked directly with the enter key handler found
-  //inside of the ChatBar component which is where it receives message content.
+  //A method for sending messages to the server, it is linked directly with the "enter" key handler found
+  //inside of the ChatBar component which is where it receives message and/or url content.
   addMessages = (message, urls = []) => {
-    console.log()
     const newMessage = {
       type: "postMessage",
       username: this.state.currentUser.name,
@@ -56,11 +56,11 @@ class App extends Component {
       color: this.state.currentUser.color,
       url: urls
     };
-    //How the message is communicated to the server
+    //How the users message is communicated to the server
     this.socket.send(JSON.stringify(newMessage));
   }
   //A method to update the current users name state based on the input they provide from
-  //the onChange handler found inside of the ChatBar component
+  //the onChange handler found inside of the ChatBar component.
   addNewUserName = (name) => {
     const currentUser = {
       name: name,
@@ -70,7 +70,6 @@ class App extends Component {
       type: "postNotification",
       content: `${this.state.currentUser.name} changed their name to ${name}`
     }
-    console.log(nameChange)
     //How the notification is communicated to the server
     this.socket.send(JSON.stringify(nameChange));
     this.setState({currentUser});

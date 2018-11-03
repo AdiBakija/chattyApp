@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-
+//This component represents the content found within the chatbar (two input fields for name and messages).
 class ChatBar extends Component {
   //This handles the input from the message input and passes it into the addMessages method found within the
   //App component

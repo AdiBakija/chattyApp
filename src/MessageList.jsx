@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Message from './Message.jsx';
-
+//This component represents the full list of messages/notifications being rendered to the app
 class MessageList extends Component {
   render() {
     //This constant maps each individual message to the message component

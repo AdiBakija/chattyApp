@@ -1,12 +1,13 @@
 import React, {Component} from 'react';
-
+//This component represents each individual message being rendered to the app.
 class Message extends Component {
   render() {
     let message;
     let userColor = {
       color: this.props.messages.color
     }
-
+    //Render incoming messages whether they include string content or both images and string content.
+    //Render notifications when users change names.
     if(this.props.messages.type === "incomingMessage") {
       let imageUrls = [];
       if (this.props.messages.url && this.props.messages.url.length > 0) {

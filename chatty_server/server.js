@@ -3,7 +3,6 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
 const uuidv4 = require('uuid/v4');
-uuidv4();
 
 // Set the port to 3001
 const PORT = 3001;
@@ -19,9 +18,12 @@ const wss = new SocketServer({ server });
 
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
-// the ws parameter in the callback.
+// the client parameter in the callback.
 wss.on('connection', (client) => {
   console.log("Client connected")
+
+  //A function which counts the amount of users connected to the websocket
+  //and broadcasts the result to all users.
   const updateUserAmount = () => {
     const numClients = {
       type: "incomingUserAmount",
@@ -31,6 +33,9 @@ wss.on('connection', (client) => {
   }
   updateUserAmount();
 
+  //Function which creates a random color for every user that connects to the application
+  //***NOTE: The colour is sent only to an individual user instead of a broadcast to all users.
+  //Sending to all users would override the color everytime of all connected users to be the same color.
   const assignUserColour = () => {
     const colorArray = ['blue', 'red', 'pink', 'yellow', 'orange',
         'black', 'cyan', 'grey'];
@@ -47,7 +52,7 @@ wss.on('connection', (client) => {
   client.on('message', (event) => {
     //Parses the received information from the client side and parses it back into JSON
     const parsedEvent = JSON.parse(event);
-    //Accessed the message from the parsed event object and broadcast it back to clients
+    //Accesses the message from the parsed event object and broadcasts it back to clients
     if (parsedEvent.type === "postMessage") {
       const messageObj = {
         type: "incomingMessage",
@@ -58,7 +63,7 @@ wss.on('connection', (client) => {
         url: parsedEvent.url
       }
       broadCastAll(messageObj);
-
+    //Accesses the notification from the parsed event object and broadcasts it back to clients
     } else if (parsedEvent.type === "postNotification") {
       const notificationObj = {
         type: "incomingNotification",
