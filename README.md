@@ -1,7 +1,7 @@
-React Boilerplate
+ChattyApp
 =====================
 
-A minimal and light dev environment for ReactJS.
+ChattyApp is a simple, single-page chat web application that uses WebsSocket, ReactJS, HTML5 & SASS.
 
 ### Usage
 Fork this repository, then clone your fork of this repository.
